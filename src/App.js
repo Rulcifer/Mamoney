@@ -69,7 +69,7 @@ class App extends React.Component {
 
               <div className='transaksi ms-3 d-flex flex-column'>
                 <h6 className=''>Menerima Gaji</h6>
-                <span className='title'>1 July 2024</span>
+                <span className='title-sm'>1 July 2024</span>
               </div>
             </div>
 
