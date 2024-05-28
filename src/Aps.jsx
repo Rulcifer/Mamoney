@@ -1,5 +1,6 @@
 import './App.css';
 import React from 'react';
+import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
@@ -114,11 +115,15 @@ class ModalAdd extends React.Component {
     super();
 
     this.state = {
-      show : false
+      show : false,
+      descriptionModal : '',
+      nominalModal : 0,
+      dateModal : '',
     }
 
     this.handleClose = this.handleClose.bind(this);
     this.handleShow = this.handleShow.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   handleClose() {
@@ -133,6 +138,14 @@ class ModalAdd extends React.Component {
     })
   }
 
+  handleChange(evt) {
+    this.setState ({
+        [evt.target.name] : evt.target.value
+    })
+
+    console.log(this.state)
+  }
+
   render() {
     return (
       <>
@@ -142,11 +155,44 @@ class ModalAdd extends React.Component {
           <Modal.Header closeButton>
             <Modal.Title>{this.props.modalheader}</Modal.Title>
           </Modal.Header>
-          <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+          <Modal.Body>
+            <div className="mb-3">
+                <label className="form-label">Description</label>
+                <input 
+                type="text"
+                className="form-control" 
+                placeholder="Input Description" 
+                name="descriptionModal" 
+                value={this.state.descriptionModal}
+                onChange={this.handleChange}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">Nominal</label>
+                <input 
+                type="number"
+                className="form-control" 
+                placeholder="Input Nominal" 
+                name="nominalModal" 
+                value={this.state.nominalModal}
+                onChange={this.handleChange}
+                />
+            </div>
+
+            <div className="mb-3">
+                <label className="form-label">Date</label>
+                <input 
+                type="date"
+                className="form-control" 
+                placeholder="Input Date" 
+                name="dateModal" 
+                value={this.state.dateModal}
+                onChange={this.handleChange}
+                />
+            </div>
+          </Modal.Body>
           <Modal.Footer>
-            {/* <Button variant="secondary" onClick={this.handleClose}>
-              Close
-            </Button> */}
             <Button variant="primary" onClick={this.handleClose}>
               Save
             </Button>
