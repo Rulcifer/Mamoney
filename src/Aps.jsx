@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import { useState } from 'react';
+// import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
@@ -25,11 +25,39 @@ class App extends React.Component {
         {
           description : 'Makan Harian',
           date : '2 July 2024',
-          nominal : '50000',
+          nominal : '500000',
           category : 'OUT'
         }
       ]
     }
+
+    this.addItem = this.addItem.bind(this);
+  }
+
+  addItem(object) {
+    console.log(object)
+    this.setState({
+      summary : [ ...this.state.summary, object ]
+    }) 
+  }
+
+  componentDidMount() {
+    let dataUangIN = this.state.summary.filter( (item)=>item.category === 'IN' );
+    let nominalUangIN = dataUangIN.map((item)=> item.nominal );
+    let amountUangIN = nominalUangIN.reduce((total, num)=> total + num )
+
+    let dataUangOUT = this.state.summary.filter( (item)=>item.category === 'OUT' );
+    let nominalUangOUT = dataUangOUT.map((item)=> item.nominal );
+    let amountUangOUT = nominalUangOUT.reduce((total, num)=> total + num )
+
+    this.setState({
+      income : amountUangIN,
+      transactionIN : nominalUangIN.length,
+      spending : amountUangOUT,
+      transactionOUT : nominalUangOUT.length,
+      existingMoney : amountUangIN - amountUangOUT,
+      percentMoney : Math.floor((amountUangIN - amountUangOUT)/amountUangIN * 100)
+    })
   }
 
 
@@ -40,7 +68,7 @@ class App extends React.Component {
           <div className='col-12 text-center'>
             <h1 className='fw-bold'>Uang Rulskuy</h1>
             <hr className='w-75 mx-auto'/>
-            <h2 className='fw-bold'>Rp. {this.state.existingMoney}</h2>
+            <h2 className='fw-bold'>Rp. {this.state.existingMoney},-</h2>
             <span className='title-md'>Sisa uang kamu tersisa {this.state.percentMoney}%</span>
           </div>
         </div>
@@ -48,26 +76,26 @@ class App extends React.Component {
         <div className='row mt-4'>
           <div className='col-6'>
             <div className='card-wrapper p-4'>
-              <div className='icon-wrapper mb-1'>
+              <div className='icon-wrapper-in mb-1'>
                 <i className="bi bi-wallet2"></i>
               </div>
               <span className='title-sm'>Pemasukan</span>
-              <h3 className='fw-bold'>Rp. {this.state.income}</h3>
+              <h3 className='fw-bold'>Rp. {this.state.income},-</h3>
               <div>
-              <span className='title-sm text-ungu fw-bold'>50</span><span className='title-sm'> Transaksi</span>
+              <span className='title-sm text-ungu fw-bold'>{this.state.transactionIN}</span><span className='title-sm'> Transaksi</span>
               </div>
             </div>
           </div>
 
           <div className='col-6'>
             <div className='card-wrapper p-4'>
-              <div className='icon-wrapper mb-1'>
+              <div className='icon-wrapper-in mb-1'>
                 <i className="bi bi-cash"></i>
               </div>
               <span className='title-sm'>Pengeluaran</span>
-              <h3 className='fw-bold'>Rp. {this.state.spending}</h3>
+              <h3 className='fw-bold'>Rp. {this.state.spending},-</h3>
               <div>
-              <span className='title-sm text-ungu fw-bold'>50</span><span className='title-sm'> Transaksi</span>
+              <span className='title-sm text-ungu fw-bold'>{this.state.transactionOUT}</span><span className='title-sm'> Transaksi</span>
               </div>
             </div>
           </div>
@@ -78,8 +106,8 @@ class App extends React.Component {
           <div className='col-12 d-flex justify-content-between align-items-center'>
             <h4 className=''>Ringkasan Transaksi</h4>
             <div className='wrapper-button d-flex'>
-              <ModalAdd variant="button btn-ungu px-3 py-2 me-2" text="Pemasukan" icon="bi bi-plus-circle-fill" modalheader="Tambahkan jumlah Pemasukan"/>
-              <ModalAdd variant="button btn-pink px-3 py-2" text="Pengeluaran" icon="bi bi-dash-circle-fill" modalheader="Tambahkan jumlah Pengeluaran"/>
+              <ModalAdd action={this.addItem} category="IN" variant="button btn-ungu px-3 py-2 me-2" text="Pemasukan" icon="bi bi-plus-circle-fill" modalheader="Tambahkan jumlah Pemasukan"/>
+              <ModalAdd action={this.addItem} category="OUT" variant="button btn-pink px-3 py-2" text="Pengeluaran" icon="bi bi-dash-circle-fill" modalheader="Tambahkan jumlah Pengeluaran"/>
             </div>
           </div>
         </div>
@@ -116,14 +144,16 @@ class ModalAdd extends React.Component {
 
     this.state = {
       show : false,
-      descriptionModal : '',
-      nominalModal : 0,
-      dateModal : '',
+      description : '',
+      nominal : 0,
+      date: '',
+      category : '',
     }
 
     this.handleClose = this.handleClose.bind(this);
     this.handleShow = this.handleShow.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.addItem = this.addItem.bind(this);
   }
 
   handleClose() {
@@ -134,7 +164,8 @@ class ModalAdd extends React.Component {
 
   handleShow() {
     this.setState({
-      show : true
+      show : true,
+      category : this.props.category
     })
   }
 
@@ -142,8 +173,20 @@ class ModalAdd extends React.Component {
     this.setState ({
         [evt.target.name] : evt.target.value
     })
+  }
 
-    console.log(this.state)
+  addItem() {
+    const Data = {
+      description : this.state.description,
+      nominal : parseInt(this.state.nominal),
+      date : this.state.date,
+      category : this.state.category,
+    }
+    const fnAddItem = this.props.action;
+    fnAddItem(Data);
+    this.setState({
+      show : false
+    })
   }
 
   render() {
@@ -162,8 +205,8 @@ class ModalAdd extends React.Component {
                 type="text"
                 className="form-control" 
                 placeholder="Input Description" 
-                name="descriptionModal" 
-                value={this.state.descriptionModal}
+                name="description" 
+                value={this.state.description}
                 onChange={this.handleChange}
                 />
             </div>
@@ -174,8 +217,8 @@ class ModalAdd extends React.Component {
                 type="number"
                 className="form-control" 
                 placeholder="Input Nominal" 
-                name="nominalModal" 
-                value={this.state.nominalModal}
+                name="nominal" 
+                value={this.state.nominal}
                 onChange={this.handleChange}
                 />
             </div>
@@ -186,20 +229,31 @@ class ModalAdd extends React.Component {
                 type="date"
                 className="form-control" 
                 placeholder="Input Date" 
-                name="dateModal" 
-                value={this.state.dateModal}
+                name="date" 
+                value={this.state.date}
+                onChange={this.handleChange}
+                />
+            </div>
+
+            <div>
+                <input 
+                type="hidden"
+                className="form-control" 
+                placeholder="Input Category" 
+                name="category" 
+                value={this.state.category}
                 onChange={this.handleChange}
                 />
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={this.handleClose}>
+            <button className={this.props.variant} onClick={this.addItem}>
               Save
-            </Button>
+            </button>
           </Modal.Footer>
         </Modal>
       </>
-    )
+    );
   }
 }
 
